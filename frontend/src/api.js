@@ -1,5 +1,5 @@
-// let API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:4000/api';
-let API_BASE = process.env.REACT_APP_API_BASE || 'https://xeno-fde-assignment.onrender.com/api';
+// Default to local backend; override with REACT_APP_API_BASE for deployed API (e.g., https://xeno-fde-assignment.onrender.com/api)
+let API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:4000/api';
 // Normalize base: if someone sets a bare host without protocol, assume http
 if (!/^https?:\/\//i.test(API_BASE)) {
   API_BASE = `http://${API_BASE}`;
@@ -37,6 +37,7 @@ export const api = {
   linkShopify: (payload) => request('/tenants/shopify', { method: 'POST', body: JSON.stringify(payload) }),
   ingestRun: () => request('/ingest/run', { method: 'POST' }),
   checkShopify: () => request('/tenants/shopify/check'),
+  me: () => request('/tenants/me'),
   summary: () => request('/insights/summary'),
   ordersByDate: (start, end) => {
     const params = new URLSearchParams();

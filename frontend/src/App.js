@@ -21,15 +21,19 @@ function ConnectShopify({ onConnected }) {
   const [adminToken, setAdminToken] = useState('');
   const [error, setError] = useState('');
   const [checkStatus, setCheckStatus] = useState('');
+  const [saving, setSaving] = useState(false);
 
   async function submit(e) {
     e.preventDefault();
     setError('');
+    setSaving(true);
     try {
       await api.linkShopify({ domain, adminToken });
       onConnected();
     } catch (err) {
       setError(err.message || 'Failed');
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -37,11 +41,14 @@ function ConnectShopify({ onConnected }) {
     <div className="card">
       <h2>Connect Shopify</h2>
       <form onSubmit={submit}>
-        <input placeholder="Shop domain (example.myshopify.com)" value={domain} onChange={e => setDomain(e.target.value)} />
-        <input placeholder="Admin access token (shpat_...)" value={adminToken} onChange={e => setAdminToken(e.target.value)} />
+        <div className="form-row">
+          <input placeholder="Shop domain (example.myshopify.com)" value={domain} onChange={e => setDomain(e.target.value)} />
+          <input placeholder="Admin access token (shpat_...)" value={adminToken} onChange={e => setAdminToken(e.target.value)} />
+        </div>
         {error && <div className="error">{error}</div>}
-        <button type="submit">Save Connection</button>
-        <button type="button" onClick={async () => {
+        <div className="form-actions">
+          <button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save Connection'}</button>
+          <button type="button" className="button-ghost" onClick={async () => {
           setError('');
           setCheckStatus('');
           try {
@@ -52,6 +59,7 @@ function ConnectShopify({ onConnected }) {
             setCheckStatus(`Check failed: ${e.message}`);
           }
         }}>Check Shopify</button>
+        </div>
       </form>
       {checkStatus && <div style={{ marginTop: 8 }}>{checkStatus}</div>}
     </div>
@@ -65,6 +73,7 @@ function Dashboard() {
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   async function load() {
     try {
@@ -83,7 +92,7 @@ function Dashboard() {
   }
 
   useEffect(() => {
-    load();
+    (async () => { await load(); setLoading(false); })();
     // eslint-disable-next-line
   }, []);
 
@@ -123,18 +132,28 @@ function Dashboard() {
   return (
     <div>
       <div className="kpis">
-        <div className="kpi">
-          <div className="kpi-label">Customers</div>
-          <div className="kpi-value">{summary.customers}</div>
-        </div>
-        <div className="kpi">
-          <div className="kpi-label">Orders</div>
-          <div className="kpi-value">{summary.orders}</div>
-        </div>
-        <div className="kpi">
-          <div className="kpi-label">Revenue</div>
-          <div className="kpi-value">₹ {summary.revenue.toFixed(2)}</div>
-        </div>
+        {loading ? (
+          <>
+            <div className="kpi skeleton sk-kpi" />
+            <div className="kpi skeleton sk-kpi" />
+            <div className="kpi skeleton sk-kpi" />
+          </>
+        ) : (
+          <>
+            <div className="kpi">
+              <div className="kpi-label">Customers</div>
+              <div className="kpi-value">{summary.customers}</div>
+            </div>
+            <div className="kpi">
+              <div className="kpi-label">Orders</div>
+              <div className="kpi-value">{summary.orders}</div>
+            </div>
+            <div className="kpi">
+              <div className="kpi-label">Revenue</div>
+              <div className="kpi-value">₹ {summary.revenue.toFixed(2)}</div>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="filters">
@@ -149,12 +168,12 @@ function Dashboard() {
 
       <div className="chart">
         <h3>Revenue over time</h3>
-        <Line data={lineData} />
+        {loading ? <div className="skeleton sk-chart" /> : <Line data={lineData} />}
       </div>
 
       <div className="chart">
         <h3>Top customers by spend</h3>
-        <Bar data={barData} />
+        {loading ? <div className="skeleton sk-chart" /> : <Bar data={barData} />}
       </div>
     </div>
   );
@@ -162,17 +181,32 @@ function Dashboard() {
 
 function App() {
   const [connected, setConnected] = useState(false);
+  const [status, setStatus] = useState('Checking connection…');
 
-  // Optionally, check if already connected (e.g., via /tenants/me)
-  // For now, always show connect form first
+  useEffect(() => {
+    (async () => {
+      try {
+        const me = await api.me();
+        if (me?.shopDomain && me?.hasAccessToken) {
+          setConnected(true);
+          setStatus(`Connected: ${me.shopDomain}`);
+        } else {
+          setStatus('Not connected');
+        }
+      } catch (_) {
+        setStatus('Not connected');
+      }
+    })();
+  }, []);
 
   return (
     <div className="container">
       <header>
         <h1>Xeno FDE: Shopify Insights</h1>
+        <div className="status">{status}</div>
       </header>
       {!connected ? (
-        <ConnectShopify onConnected={() => setConnected(true)} />
+        <ConnectShopify onConnected={() => { setConnected(true); setStatus('Connected'); }} />
       ) : (
         <Dashboard />
       )}
