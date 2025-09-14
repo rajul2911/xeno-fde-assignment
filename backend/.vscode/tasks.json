@@ -1,0 +1,19 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Prisma Generate",
+			"type": "shell",
+			"command": "npx",
+			"args": [
+				"-y",
+				"prisma",
+				"generate"
+			],
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build"
+		}
+	]
+}

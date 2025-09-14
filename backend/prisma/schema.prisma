@@ -1,0 +1,102 @@
+// Prisma schema for multi-tenant Shopify ingestion
+// DB: MySQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Map Prisma models to your existing MySQL tables
+
+model Tenant {
+  id           Int       @id @default(autoincrement())
+  shopDomain   String?   @unique @map("shop_domain")
+  accessToken  String?   @map("access_token")
+  // Optional auth fields for the UI (added via migration if missing)
+  name         String?   @db.VarChar(255)
+  email        String?   @unique @db.VarChar(255)
+  passwordHash String?   @db.VarChar(255)
+
+  customers Customer[]
+  products  Product[]
+  orders    Order[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map("tenants")
+}
+
+model Customer {
+  id          Int       @id @default(autoincrement())
+  tenantId    Int       @map("tenant_id")
+  tenant      Tenant    @relation(fields: [tenantId], references: [id])
+  shopifyId   String    @map("shopify_id")
+  email       String?   @db.VarChar(255)
+  firstName   String?   @map("first_name") @db.VarChar(255)
+  lastName    String?   @map("last_name") @db.VarChar(255)
+  totalSpend  Decimal   @default(0) @map("total_spend") @db.Decimal(12, 2)
+  orders      Order[]
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@index([tenantId])
+  @@index([shopifyId])
+  @@unique([tenantId, shopifyId])
+  @@map("customers")
+}
+
+model Product {
+  id         Int        @id @default(autoincrement())
+  tenantId   Int        @map("tenant_id")
+  tenant     Tenant     @relation(fields: [tenantId], references: [id])
+  shopifyId  String     @map("shopify_id")
+  title      String?    @db.VarChar(500)
+  sku        String?    @db.VarChar(255)
+  price      Decimal    @default(0) @db.Decimal(12, 2)
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @updatedAt @map("updated_at")
+  orderItems OrderItem[]
+
+  @@index([tenantId])
+  @@index([shopifyId])
+  @@unique([tenantId, shopifyId])
+  @@map("products")
+}
+
+model Order {
+  id          Int        @id @default(autoincrement())
+  tenantId    Int        @map("tenant_id")
+  tenant      Tenant     @relation(fields: [tenantId], references: [id])
+  shopifyId   String     @map("shopify_id")
+  customer    Customer?  @relation(fields: [customerId], references: [id])
+  customerId  Int?       @map("customer_id")
+  totalPrice  Decimal    @default(0) @map("total_price") @db.Decimal(12, 2)
+  // created_at exists in your schema; no processedAt; make createdAt optional
+  createdAt   DateTime?  @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  items OrderItem[]
+
+  @@index([tenantId])
+  @@index([shopifyId])
+  @@index([customerId])
+  @@unique([tenantId, shopifyId])
+  @@map("orders")
+}
+
+model OrderItem {
+  id         Int      @id @default(autoincrement())
+  order      Order    @relation(fields: [orderId], references: [id])
+  orderId    Int      @map("order_id")
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  Int      @map("product_id")
+  quantity   Int      @default(1)
+  price      Decimal  @default(0) @db.Decimal(12, 2)
+
+  @@map("order_items")
+}
