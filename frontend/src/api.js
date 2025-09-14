@@ -1,5 +1,5 @@
 // Default to local backend; override with REACT_APP_API_BASE for deployed API (e.g., https://xeno-fde-assignment.onrender.com/api)
-let API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:4000/api';
+let API_BASE = process.env.REACT_APP_API_BASE || 'https://xeno-fde-assignment.onrender.com/api';
 // Normalize base: if someone sets a bare host without protocol, assume http
 if (!/^https?:\/\//i.test(API_BASE)) {
   API_BASE = `http://${API_BASE}`;
