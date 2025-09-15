@@ -22,6 +22,7 @@ function ConnectShopify({ onConnected }) {
   const [error, setError] = useState('');
   const [checkStatus, setCheckStatus] = useState('');
   const [saving, setSaving] = useState(false);
+  const [checking, setChecking] = useState(false);
 
   async function submit(e) {
     e.preventDefault();
@@ -49,16 +50,19 @@ function ConnectShopify({ onConnected }) {
         <div className="form-actions">
           <button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save Connection'}</button>
           <button type="button" className="button-ghost" onClick={async () => {
-          setError('');
-          setCheckStatus('');
-          try {
-            const res = await api.checkShopify();
-            const okFlags = [res.orders?.ok, res.customers?.ok, res.products?.ok].filter(Boolean).length;
-            setCheckStatus(`OK: ${res.shop} | Access: ${okFlags>0 ? 'some' : 'none'} (orders:${res.orders?.code||'200'} customers:${res.customers?.code||'200'} products:${res.products?.code||'200'})`);
-          } catch (e) {
-            setCheckStatus(`Check failed: ${e.message}`);
-          }
-        }}>Check Shopify</button>
+            setError('');
+            setCheckStatus('');
+            setChecking(true);
+            try {
+              const res = await api.checkShopifyTyped({ domain, adminToken });
+              const okFlags = [res.orders?.ok, res.customers?.ok, res.products?.ok].filter(Boolean).length;
+              setCheckStatus(`OK: ${res.shop} | Access: ${okFlags>0 ? 'some' : 'none'} (orders:${res.orders?.code||'200'} customers:${res.customers?.code||'200'} products:${res.products?.code||'200'})`);
+            } catch (e) {
+              setCheckStatus(`Check failed: ${e.message}`);
+            } finally {
+              setChecking(false);
+            }
+          }}>{checking ? 'Checking…' : 'Check Shopify'}</button>
         </div>
       </form>
       {checkStatus && <div style={{ marginTop: 8 }}>{checkStatus}</div>}
@@ -213,7 +217,23 @@ function App() {
     <div className="container">
       <header>
         <h1>Xeno FDE: Shopify Insights</h1>
-        <div className="status">{status}</div>
+        <div className="status" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span>{status}</span>
+          {connected && (
+            <button
+              className="button-ghost"
+              onClick={async () => {
+                try {
+                  await api.unlinkShopify();
+                } catch (_) {}
+                setConnected(false);
+                setStatus('Not connected');
+              }}
+            >
+              Disconnect / Switch shop
+            </button>
+          )}
+        </div>
       </header>
       {!connected ? (
         <ConnectShopify onConnected={() => { setConnected(true); setStatus('Connected'); }} />

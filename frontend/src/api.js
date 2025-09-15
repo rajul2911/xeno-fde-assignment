@@ -32,8 +32,10 @@ async function request(path, options = {}) {
 
 export const api = {
   linkShopify: (payload) => request('/tenants/shopify', { method: 'POST', body: JSON.stringify(payload) }),
+  unlinkShopify: () => request('/tenants/shopify', { method: 'DELETE' }),
   ingestRun: () => request('/ingest/run', { method: 'POST' }),
   checkShopify: () => request('/tenants/shopify/check'),
+  checkShopifyTyped: (payload) => request('/tenants/shopify/check', { method: 'POST', body: JSON.stringify(payload) }),
   me: () => request('/tenants/me'),
   summary: () => request('/insights/summary'),
   ordersByDate: (start, end) => {
