@@ -86,10 +86,11 @@ But don't give too much access until u have a good security
 ## ⚙️ Setup & Run Locally (Windows cmd)
 
 1) Backend: install, configure, migrate, run
+
 ```bat
 cd backend
 npm install
-
+```
 REM Create .env from example and fill values
 REM DATABASE_URL example for local MySQL
 REM DATABASE_URL="mysql://root:YOURPASS@127.0.0.1:3306/railway"
@@ -217,16 +218,3 @@ frontend/
   src/ (React app, Chart.js, styles)
 ```
 
----
-
-## 🧩 Architecture Diagram Source
-
-- draw.io: Add/export an image to `docs/architecture.png` and link it here:
-
-![Architecture](docs/architecture.png)
-
----
-
-## 🙋 Support / Contact
-
-Open an issue or contact your team owner. Replace this section with your email or Slack channel if needed.
