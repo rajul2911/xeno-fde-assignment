@@ -23,6 +23,7 @@ function ConnectShopify({ onConnected }) {
   const [checkStatus, setCheckStatus] = useState('');
   const [saving, setSaving] = useState(false);
   const [checking, setChecking] = useState(false);
+  const showOverlay = saving || checking;
 
   async function submit(e) {
     e.preventDefault();
@@ -66,6 +67,14 @@ function ConnectShopify({ onConnected }) {
         </div>
       </form>
       {checkStatus && <div style={{ marginTop: 8 }}>{checkStatus}</div>}
+      {showOverlay && (
+        <div className="overlay">
+          <div className="overlay-card">
+            <div className="overlay-spinner" />
+            <div>{saving ? 'Saving connection…' : 'Checking credentials…'}</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -79,6 +88,7 @@ function Dashboard() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const showOverlay = loading && !syncing; // initial dashboard load
 
   async function load() {
     setLoading(true);
@@ -189,6 +199,15 @@ function Dashboard() {
         <h3>Top customers by spend</h3>
         {loading ? <div className="skeleton sk-chart" /> : <Bar data={barData} />}
       </div>
+
+      {showOverlay && (
+        <div className="overlay">
+          <div className="overlay-card">
+            <div className="overlay-spinner" />
+            <div>Loading dashboard…</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -196,6 +215,7 @@ function Dashboard() {
 function App() {
   const [connected, setConnected] = useState(false);
   const [status, setStatus] = useState('Checking connection…');
+  const [booting, setBooting] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -210,6 +230,7 @@ function App() {
       } catch (_) {
         setStatus('Not connected');
       }
+      setBooting(false);
     })();
   }, []);
 
@@ -239,6 +260,14 @@ function App() {
         <ConnectShopify onConnected={() => { setConnected(true); setStatus('Connected'); }} />
       ) : (
         <Dashboard />
+      )}
+      {booting && (
+        <div className="overlay">
+          <div className="overlay-card">
+            <div className="overlay-spinner" />
+            <div>Checking connection…</div>
+          </div>
+        </div>
       )}
     </div>
   );

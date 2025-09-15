@@ -172,3 +172,34 @@ button.link {
   .form-row { grid-template-columns: 1fr; }
   .kpis { grid-template-columns: 1fr; }
 }
+
+/* full-screen overlay loader */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(2px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.overlay-card {
+  background: #0b1220;
+  color: #e5edff;
+  padding: 20px 24px;
+  border-radius: 12px;
+  min-width: 260px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.overlay-spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid rgba(229, 237, 255, 0.35);
+  border-top-color: #93c5fd;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
