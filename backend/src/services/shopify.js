@@ -35,10 +35,9 @@ async function fetchAllPaginated(url, headers) {
   return results;
 }
 
-// Quick credential and scope check to help debug Unauthorized (401) or Forbidden (403)
+
 async function checkCredentials(domain, token) {
   const result = { ok: false };
-  // Always check base auth first
   try {
     const res = await axios.get(`https://${domain}/admin/api/2024-10/shop.json`, { headers: adminHeaders(token) });
     result.shop = res.data?.shop?.name || domain;
@@ -51,7 +50,6 @@ async function checkCredentials(domain, token) {
     return { ok: false, baseOk: false, code, error: `Shopify auth check failed (${code}): ${detail}` };
   }
 
-  // Helper to test a resource
   async function test(path) {
     try {
       const r = await axios.get(`https://${domain}/admin/api/2024-10/${path}`, { headers: adminHeaders(token) });
@@ -69,7 +67,6 @@ async function checkCredentials(domain, token) {
   result.orders = orders;
   result.customers = customers;
   result.products = products;
-  // ok if base auth ok and at least customers or orders or products ok
   result.ok = !!(result.baseOk && (orders.ok || customers.ok || products.ok));
   return result;
 }
@@ -117,7 +114,6 @@ async function ingestOrders(tenantId, domain, token) {
   const url = `https://${domain}/admin/api/2024-10/orders.json?status=any&limit=250`;
   const orders = await fetchAllPaginated(url, adminHeaders(token));
   for (const o of orders) {
-    // Ensure customer exists if present
     let customerId = null;
     if (o.customer && o.customer.id) {
       const customer = await prisma.customer.upsert({
@@ -154,12 +150,9 @@ async function ingestOrders(tenantId, domain, token) {
       },
     });
 
-    // Items
     if (o.line_items) {
-      // clear existing items to avoid duplicates
       await prisma.orderItem.deleteMany({ where: { orderId: order.id } });
       for (const li of o.line_items) {
-        // ensure product exists
         const prodShopId = String(li.product_id);
         let product = await prisma.product.findUnique({ where: { tenantId_shopifyId: { tenantId, shopifyId: prodShopId } } });
         if (!product) {

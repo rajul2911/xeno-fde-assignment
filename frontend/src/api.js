@@ -1,10 +1,8 @@
-// Default to local backend; override with REACT_APP_API_BASE for deployed API (e.g., https://xeno-fde-assignment.onrender.com/api)
+
 let API_BASE = process.env.REACT_APP_API_BASE || 'https://xeno-fde-assignment.onrender.com/api';
-// Normalize base: if someone sets a bare host without protocol, assume http
 if (!/^https?:\/\//i.test(API_BASE)) {
   API_BASE = `http://${API_BASE}`;
 }
-// Trim trailing slashes for consistency
 API_BASE = API_BASE.replace(/\/$/, '');
 
 async function request(path, options = {}) {
@@ -21,7 +19,6 @@ async function request(path, options = {}) {
     try {
       data = JSON.parse(text);
     } catch (e) {
-      // Surface a clearer error if server returned HTML or plain text
       const preview = text.slice(0, 200);
       throw new Error(`Non-JSON response from API (status ${resp.status}): ${preview}`);
     }

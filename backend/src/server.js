@@ -27,9 +27,7 @@ app.use('/api/tenants', tenantRoutes);
 app.use('/api/ingest', ingestRoutes);
 app.use('/api/insights', insightsRoutes);
 
-// Global JSON error handler to avoid HTML error responses
-// Ensures body parser errors and unhandled errors return JSON consistently
-// eslint-disable-next-line no-unused-vars
+
 app.use((err, req, res, next) => {
   if (err) {
     const isJsonParse = err.type === 'entity.parse.failed' || /JSON/.test(err.message || '');

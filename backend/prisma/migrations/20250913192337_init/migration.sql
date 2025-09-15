@@ -1,4 +1,4 @@
--- CreateTable
+
 CREATE TABLE `tenants` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `shop_domain` VARCHAR(191) NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE `tenants` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- CreateTable
+
 CREATE TABLE `customers` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `tenant_id` INTEGER NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE `customers` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- CreateTable
+
 CREATE TABLE `products` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `tenant_id` INTEGER NOT NULL,

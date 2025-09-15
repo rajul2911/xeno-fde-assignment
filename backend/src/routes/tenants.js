@@ -3,7 +3,6 @@ const { prisma } = require('../util/prisma');
 
 const router = express.Router();
 
-// Link Shopify credentials for the tenant (store on tenants table)
 router.post('/shopify', async (req, res) => {
   try {
     if (!req.is('application/json')) {
@@ -12,7 +11,6 @@ router.post('/shopify', async (req, res) => {
     let { domain, adminToken } = req.body || {};
     if (!domain || !adminToken) return res.status(400).json({ error: 'Missing Shopify config' });
 
-    // Normalize domain: extract hostname, strip protocol and slashes
     try {
       if (/^https?:\/\//i.test(domain)) {
         const u = new URL(domain);
@@ -22,7 +20,6 @@ router.post('/shopify', async (req, res) => {
     domain = String(domain).trim().replace(/^\/*|\/*$/g, '');
     adminToken = String(adminToken).trim();
 
-    // Always update tenant with id=1
     const tenant = await prisma.tenant.upsert({
       where: { id: 1 },
       update: { shopDomain: domain, accessToken: adminToken },

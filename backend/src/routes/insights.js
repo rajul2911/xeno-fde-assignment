@@ -3,9 +3,7 @@ const { prisma } = require('../util/prisma');
 
 const router = express.Router();
 
-// Summary KPIs
 router.get('/summary', async (req, res) => {
-  // Demo mode: single tenant id=1
   const tenantId = 1;
   const [customers, orders, revenueAgg] = await Promise.all([
     prisma.customer.count({ where: { tenantId } }),
@@ -19,7 +17,6 @@ router.get('/summary', async (req, res) => {
   });
 });
 
-// Orders by date with optional date range
 router.get('/orders-by-date', async (req, res) => {
   const tenantId = 1;
   const { start, end } = req.query;
@@ -43,7 +40,6 @@ router.get('/orders-by-date', async (req, res) => {
   res.json({ data });
 });
 
-// Top 5 customers by spend
 router.get('/top-customers', async (req, res) => {
   const tenantId = 1;
   const orders = await prisma.order.findMany({
