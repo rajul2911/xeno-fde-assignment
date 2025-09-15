@@ -216,6 +216,7 @@ function App() {
   const [connected, setConnected] = useState(false);
   const [status, setStatus] = useState('Checking connection…');
   const [booting, setBooting] = useState(true);
+  const [disconnecting, setDisconnecting] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -244,11 +245,15 @@ function App() {
             <button
               className="button-ghost"
               onClick={async () => {
+                setDisconnecting(true);
                 try {
                   await api.unlinkShopify();
-                } catch (_) {}
+                } catch (_) {
+                  // even if it fails, allow user to try reconnecting
+                }
                 setConnected(false);
                 setStatus('Not connected');
+                setDisconnecting(false);
               }}
             >
               Disconnect / Switch shop
@@ -266,6 +271,14 @@ function App() {
           <div className="overlay-card">
             <div className="overlay-spinner" />
             <div>Checking connection…</div>
+          </div>
+        </div>
+      )}
+      {disconnecting && (
+        <div className="overlay">
+          <div className="overlay-card">
+            <div className="overlay-spinner" />
+            <div>Disconnecting…</div>
           </div>
         </div>
       )}
