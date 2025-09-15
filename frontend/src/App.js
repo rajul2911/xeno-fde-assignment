@@ -45,7 +45,14 @@ function ConnectShopify({ onConnected }) {
       <form onSubmit={submit}>
         <div className="form-row">
           <input placeholder="Shop domain (example.myshopify.com)" value={domain} onChange={e => setDomain(e.target.value)} />
-          <input placeholder="Admin access token (shpat_...)" value={adminToken} onChange={e => setAdminToken(e.target.value)} />
+          <input
+            type="password"
+            placeholder="Admin access token (shpat_...)"
+            value={adminToken}
+            onChange={e => setAdminToken(e.target.value)}
+            autoComplete="new-password"
+            spellCheck={false}
+          />
         </div>
         {error && <div className="error">{error}</div>}
         <div className="form-actions">
