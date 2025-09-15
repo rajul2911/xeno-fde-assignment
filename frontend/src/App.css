@@ -98,6 +98,22 @@ button:active { transform: translateY(1px); }
 .button-secondary { background: #111827; }
 .button-ghost { background: transparent; color: #2563eb; border: 1px dashed #93c5fd; }
 
+/* tiny inline spinner for button labels */
+.loading-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+  border: 2px solid rgba(255,255,255,0.5);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 button.link {
   background: transparent;
   color: #2563eb;

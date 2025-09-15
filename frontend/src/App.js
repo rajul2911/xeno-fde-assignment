@@ -74,8 +74,10 @@ function Dashboard() {
   const [end, setEnd] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
 
   async function load() {
+    setLoading(true);
     try {
       setError('');
       const [sum, ob, tc] = await Promise.all([
@@ -88,21 +90,27 @@ function Dashboard() {
       setTop(tc.data || []);
     } catch (e) {
       setError(e.message || 'Failed to load');
+    } finally {
+      setLoading(false);
     }
   }
 
   useEffect(() => {
-    (async () => { await load(); setLoading(false); })();
+    (async () => { await load(); })();
     // eslint-disable-next-line
   }, []);
 
   async function syncNow() {
     setError('');
+    setSyncing(true);
+    setLoading(true);
     try {
       await api.ingestRun();
       await load();
     } catch (e) {
       setError(e.message || 'Sync failed');
+    } finally {
+      setSyncing(false);
     }
   }
 
@@ -159,9 +167,11 @@ function Dashboard() {
       <div className="filters">
         <input type="date" value={start} onChange={e => setStart(e.target.value)} />
         <input type="date" value={end} onChange={e => setEnd(e.target.value)} />
-        <button onClick={load}>Apply</button>
-        <button onClick={() => { setStart(''); setEnd(''); load(); }}>Clear</button>
-        <button onClick={syncNow}>Sync Now</button>
+        <button onClick={load} disabled={syncing}>Apply</button>
+        <button onClick={() => { setStart(''); setEnd(''); load(); }} disabled={syncing}>Clear</button>
+        <button onClick={syncNow} disabled={syncing}>
+          {syncing ? (<><span className="loading-spinner" />Syncing...</>) : 'Sync Now'}
+        </button>
       </div>
 
       {error && <div className="error">{error}</div>}
